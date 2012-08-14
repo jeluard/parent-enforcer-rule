@@ -11,13 +11,13 @@ A maven enforcer rule validating all sub-modules of an aggregated project have t
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>1.1</version>
-	<inherited>false</inherited>
+        <inherited>false</inherited>
         <dependencies>
-            <dependency>
-                <groupId>com.github.jeluard.parent-enforcer-rule</groupId>
-                <artifactId>enforcer-rule</artifactId>
-                <version>1.0</version>
-            </dependency>
+          <dependency>
+            <groupId>com.github.jeluard.parent-enforcer-rule</groupId>
+            <artifactId>enforcer-rule</artifactId>
+            <version>1.0</version>
+          </dependency>
         </dependencies>
         <executions>
           <execution>
