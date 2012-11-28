@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.github.jeluard.parent-enforcer-rule</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
