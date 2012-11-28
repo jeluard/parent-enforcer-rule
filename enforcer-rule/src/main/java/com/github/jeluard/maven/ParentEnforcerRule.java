@@ -38,8 +38,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  */
 public class ParentEnforcerRule implements EnforcerRule {
 
-  private static final String POM_ARTIFACT_TYPE = "pom";     
-    
+  private static final String POM_ARTIFACT_TYPE = "pom";
+
   @Override
   public void execute(final EnforcerRuleHelper helper) throws EnforcerRuleException {
     final MavenProject project;
@@ -51,7 +51,9 @@ public class ParentEnforcerRule implements EnforcerRule {
 
     final String type = project.getArtifact().getType();
     if (!ParentEnforcerRule.POM_ARTIFACT_TYPE.equals(type)) {
-      throw new EnforcerRuleException("Skipping non "+ParentEnforcerRule.POM_ARTIFACT_TYPE+" artifact.");
+      helper.getLog().debug("Skipping non "+ParentEnforcerRule.POM_ARTIFACT_TYPE+" artifact.");
+
+      return;
     }
 
     final Parent parent = new Parent();
@@ -69,7 +71,7 @@ public class ParentEnforcerRule implements EnforcerRule {
     return new File(project.getFile().getParentFile().getPath());
   }
 
-  protected final void validateModel(final File rootFolder, final Model model, final Parent parent) throws IOException {    
+  protected final void validateModel(final File rootFolder, final Model model, final Parent parent) throws IOException {
     if (!isParentValid(model.getParent(), parent)) {
         throw new IllegalArgumentException("Parent for <"+model+"> is <"+model.getParent()+"> but must be <"+parent+">");
     }
@@ -77,7 +79,7 @@ public class ParentEnforcerRule implements EnforcerRule {
     validateSubModules(rootFolder, model, parent);
   }
 
-  protected final void validateSubModules(final File rootFolder, final Model model, final Parent parent) throws IOException {    
+  protected final void validateSubModules(final File rootFolder, final Model model, final Parent parent) throws IOException {
     //Validate all modules of pom type modules.
     if (ParentEnforcerRule.POM_ARTIFACT_TYPE.equals(model.getPackaging())) {
       final Parent newParent = new Parent();
@@ -102,8 +104,8 @@ public class ParentEnforcerRule implements EnforcerRule {
     {
       fileReader = new FileReader(new File(rootFolder, moduleFileName));
       bufferedReader = new BufferedReader(fileReader);
-      MavenXpp3Reader reader = new MavenXpp3Reader();
-      return reader.read( bufferedReader );
+      final MavenXpp3Reader reader = new MavenXpp3Reader();
+      return reader.read(bufferedReader);
     } catch (XmlPullParserException e) {
         final IOException ioe = new IOException(e);
         throw ioe;
