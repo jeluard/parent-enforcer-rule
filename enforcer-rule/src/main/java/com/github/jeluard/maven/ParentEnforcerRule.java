@@ -1,21 +1,29 @@
 /**
- * This software is licensed under the Apache 2 license, quoted below.
+ *
+ *                                Parent enforcer rule
+ *                             =========================
+ *
+ * Please visit the Remote Process web site for more information:
+ *
+ *   * http://jeluard.github.com/remote-process
  *
  * Copyright 2012 Julien Eluard
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Julien Eluard licenses this product to you under the Apache License, version 2.0 (the
+ * "License"); you may not use this product except in compliance with the License.
+ * You may obtain a copy of the License at:
  *
- *     [http://www.apache.org/licenses/LICENSE-2.0]
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ * Also, please refer to each LICENSE.<component>.txt file, which is located in
+ * the 'licenses' directory of the distribution file, for the license terms of the
+ * components that this product depends on.
  */
-
 package com.github.jeluard.maven;
 
 import java.io.BufferedReader;
