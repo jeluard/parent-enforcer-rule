@@ -5,6 +5,8 @@
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
 
+  <name>Parent enforcer rule multiple test</name>
+
   <parent>
     <groupId>com.github.jeluard.parent-enforcer-rule.tests</groupId>
     <artifactId>parent</artifactId>
@@ -15,6 +17,7 @@
   <modules>
     <module>module1</module>
     <module>module2</module>
+    <module>module3</module>
   </modules>
 
   <build>
@@ -22,7 +25,7 @@
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>1.1</version>
-	<inherited>false</inherited>
+        <inherited>false</inherited>
         <dependencies>
           <dependency>
             <groupId>com.github.jeluard.parent-enforcer-rule</groupId>
