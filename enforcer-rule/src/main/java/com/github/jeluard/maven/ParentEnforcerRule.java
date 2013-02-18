@@ -64,13 +64,14 @@ public class ParentEnforcerRule implements EnforcerRule {
       return;
     }
 
-    final Parent parent = new Parent();
-    parent.setGroupId(project.getGroupId());
-    parent.setArtifactId(project.getArtifactId());
-    parent.setVersion(project.getVersion());
+    final Parent expectedParent = new Parent();
+    expectedParent.setGroupId(project.getGroupId());
+    expectedParent.setArtifactId(project.getArtifactId());
+    expectedParent.setVersion(project.getVersion());
     try {
-      validateSubModules(extractRootFolder(project), project.getModel(), parent);
+      validateSubModules(extractRootFolder(project), project.getModel(), expectedParent);
     } catch (IOException e) {
+      e.printStackTrace();
       throw new EnforcerRuleException("Failed to process one of project's module", e);
     }
   }
@@ -79,30 +80,86 @@ public class ParentEnforcerRule implements EnforcerRule {
     return new File(project.getFile().getParentFile().getPath());
   }
 
-  protected final void validateModel(final File rootFolder, final Model model, final Parent parent) throws IOException {
-    if (!isParentValid(model.getParent(), parent)) {
-        throw new IllegalArgumentException("Parent for <"+model+"> is <"+model.getParent()+"> but must be <"+parent+">");
+  protected final void validateModel(final File rootFolder, final Model model, final Parent expectedParent) throws IOException {
+    if (!isParentValid(model.getParent(), expectedParent)) {
+        throw new IllegalArgumentException("Parent for <"+model+"> is <"+model.getParent()+"> but must be <"+expectedParent+">");
     }
 
-    validateSubModules(rootFolder, model, parent);
+    validateSubModules(rootFolder, model, expectedParent);
   }
 
-  protected final void validateSubModules(final File rootFolder, final Model model, final Parent parent) throws IOException {
+  protected final File parentFolder(final File rootFolder, final Parent parent) throws IOException {
+    final String relativePath = parent.getRelativePath();
+    if (relativePath != null) {
+      return new File(rootFolder, relativePath.substring(0, relativePath.length()-7));
+    }
+    return new File(rootFolder, "..");
+  }
+
+  protected final String getGroupId(final File rootFolder, final Model model) throws IOException {
+    final String groupId = model.getGroupId();
+    if (groupId != null) {
+      return groupId;
+    }
+
+    File folder = parentFolder(rootFolder, model.getParent());
+    Model parentModel = loadModel(folder);
+    while (parentModel != null) {
+      final String parentGroupId = parentModel.getGroupId();
+      if (parentGroupId != null) {
+        return parentGroupId;
+      }
+
+      parentModel = loadModel(folder);
+      folder = parentFolder(folder, parentModel.getParent());
+    }
+    throw new IllegalStateException("Failed to access groupId for <"+model+">");
+  }
+
+  protected final String getVersion(final File rootFolder, final Model model) throws IOException {
+    final String version = model.getVersion();
+    if (version != null) {
+      return version;
+    }
+
+    File folder = parentFolder(rootFolder, model.getParent());
+    Model parentModel = loadModel(folder);
+    while (parentModel != null) {
+      final String parentVersion = parentModel.getVersion();
+      if (parentVersion != null) {
+        return parentVersion;
+      }
+
+      parentModel = loadModel(folder);
+      folder = parentFolder(folder, parentModel.getParent());
+    }
+    throw new IllegalStateException("Failed to access version for <"+model+">");
+  }
+
+  protected final void validateSubModules(final File rootFolder, final Model model, final Parent expectedParent) throws IOException {
     //Validate all modules of pom type modules.
     if (ParentEnforcerRule.POM_ARTIFACT_TYPE.equals(model.getPackaging())) {
-      final Parent newParent = new Parent();
-      newParent.setGroupId(model.getGroupId());
-      newParent.setArtifactId(model.getArtifactId());
-      newParent.setVersion(parent.getVersion());//Model version might be inherited from Parent (thus not set at the model level). Rely on Parent#getVersion().
+      final Parent newExpectedParent = new Parent();
+      newExpectedParent.setGroupId(getGroupId(rootFolder, model));
+      newExpectedParent.setArtifactId(model.getArtifactId());
+      newExpectedParent.setVersion(getVersion(rootFolder, model));//Model version might be inherited from Parent (thus not set at the model level). Rely on Parent#getVersion().
+      System.out.println("Parent module: "+newExpectedParent);
       for (final String module : model.getModules()) {
         final Model moduleModel = loadModel(rootFolder, module+"/pom.xml");
-        validateModel(new File(rootFolder, module), moduleModel, newParent);
+        System.out.println("  Validating against module: "+moduleModel);
+        validateModel(new File(rootFolder, module), moduleModel, newExpectedParent);
       }
     }
   }
 
-  protected final boolean isParentValid(final Parent modelParent, final Parent parent) {
-    return parent.getArtifactId().equals(modelParent.getArtifactId()) && parent.getGroupId().equals(modelParent.getGroupId()) && parent.getVersion().equals(modelParent.getVersion());
+  protected final boolean isParentValid(final Parent modelParent, final Parent expectedParent) {
+    return expectedParent.getArtifactId().equals(modelParent.getArtifactId())
+            /*&& parent.getGroupId() != null */&& expectedParent.getGroupId().equals(modelParent.getGroupId())
+            && expectedParent.getVersion().equals(modelParent.getVersion());
+  }
+
+  protected final Model loadModel(final File rootFolder) throws IOException {
+    return loadModel(rootFolder, "pom.xml");
   }
 
   protected final Model loadModel(final File rootFolder, final String moduleFileName) throws IOException {
@@ -110,6 +167,7 @@ public class ParentEnforcerRule implements EnforcerRule {
     BufferedReader bufferedReader = null;
     try
     {
+      System.out.println("loading: "+new File(rootFolder, moduleFileName));
       fileReader = new FileReader(new File(rootFolder, moduleFileName));
       bufferedReader = new BufferedReader(fileReader);
       final MavenXpp3Reader reader = new MavenXpp3Reader();
