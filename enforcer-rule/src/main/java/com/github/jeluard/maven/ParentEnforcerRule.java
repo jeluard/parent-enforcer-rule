@@ -71,7 +71,6 @@ public class ParentEnforcerRule implements EnforcerRule {
     try {
       validateSubModules(extractRootFolder(project), project.getModel(), expectedParent);
     } catch (IOException e) {
-      e.printStackTrace();
       throw new EnforcerRuleException("Failed to process one of project's module", e);
     }
   }
@@ -142,11 +141,9 @@ public class ParentEnforcerRule implements EnforcerRule {
       final Parent newExpectedParent = new Parent();
       newExpectedParent.setGroupId(getGroupId(rootFolder, model));
       newExpectedParent.setArtifactId(model.getArtifactId());
-      newExpectedParent.setVersion(getVersion(rootFolder, model));//Model version might be inherited from Parent (thus not set at the model level). Rely on Parent#getVersion().
-      System.out.println("Parent module: "+newExpectedParent);
+      newExpectedParent.setVersion(getVersion(rootFolder, model));
       for (final String module : model.getModules()) {
         final Model moduleModel = loadModel(rootFolder, module+"/pom.xml");
-        System.out.println("  Validating against module: "+moduleModel);
         validateModel(new File(rootFolder, module), moduleModel, newExpectedParent);
       }
     }
@@ -154,7 +151,7 @@ public class ParentEnforcerRule implements EnforcerRule {
 
   protected final boolean isParentValid(final Parent modelParent, final Parent expectedParent) {
     return expectedParent.getArtifactId().equals(modelParent.getArtifactId())
-            /*&& parent.getGroupId() != null */&& expectedParent.getGroupId().equals(modelParent.getGroupId())
+            && expectedParent.getGroupId().equals(modelParent.getGroupId())
             && expectedParent.getVersion().equals(modelParent.getVersion());
   }
 
@@ -165,9 +162,7 @@ public class ParentEnforcerRule implements EnforcerRule {
   protected final Model loadModel(final File rootFolder, final String moduleFileName) throws IOException {
     FileReader fileReader = null;
     BufferedReader bufferedReader = null;
-    try
-    {
-      System.out.println("loading: "+new File(rootFolder, moduleFileName));
+    try {
       fileReader = new FileReader(new File(rootFolder, moduleFileName));
       bufferedReader = new BufferedReader(fileReader);
       final MavenXpp3Reader reader = new MavenXpp3Reader();
