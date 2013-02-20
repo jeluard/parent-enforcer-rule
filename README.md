@@ -16,7 +16,7 @@ A maven enforcer rule validating all sub-modules of an aggregated project have t
           <dependency>
             <groupId>com.github.jeluard.parent-enforcer-rule</groupId>
             <artifactId>enforcer-rule</artifactId>
-            <version>1.0</version>
+            <version>1.0.2</version>
           </dependency>
         </dependencies>
         <executions>
